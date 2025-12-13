@@ -56,6 +56,11 @@ export default {
       payload.name = payload.name.trim();
     }
 
+    // Se a senha foi enviada, criptografa antes de salvar
+    if (payload.password) {
+      payload.password = await bcrypt.hash(payload.password, 12);
+    }
+
     Object.keys(payload).forEach((key) => {
       if (payload[key] === undefined) delete payload[key];
     });
