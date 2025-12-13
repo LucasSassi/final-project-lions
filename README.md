@@ -3,7 +3,7 @@
 > Projeto final desenvolvido para o curso avançado de programação da Lions (Dez/2025).
 
 ![Status do Projeto](https://img.shields.io/badge/Status-Pendente-brightgreen)
-![FlutterFlow](https://img.shields.io/badge/Frontend-FlutterFlow-blue) // AINDA NAO CONCLUIDO
+![FlutterFlow](https://img.shields.io/badge/Frontend-FlutterFlow-blue) // AINDA NAO CONCLUIDO 
 ![Node.js](https://img.shields.io/badge/Backend-Node.js-green)
 ![API](https://img.shields.io/badge/API-RESTful-orange)
 ![MongoDB](https://img.shields.io/badge/Database-MongoDB-green)
@@ -75,17 +75,19 @@ backend/
 
 * ✅ **Criar Usuário (Registro):** Cadastro com nome, email e senha (criptografada com bcrypt)
 * ✅ **Login:** Autenticação com validação de credenciais e geração de token JWT
-* ✅ **Listar Usuários:** Retorna todos os usuários cadastrados
+* ✅ **Listar Usuários:** Retorna todos os usuários cadastrados **(requer role ADMIN)**
 * ✅ **Buscar Usuário por ID:** Retorna dados de um usuário específico
 * ✅ **Atualizar Usuário:** Atualiza informações de um usuário
-* ✅ **Deletar Usuário:** Remove usuário do sistema
+* ✅ **Deletar Usuário:** Remove usuário do sistema **(requer role ADMIN)**
 * ✅ **Hello (Autenticado):** Rota protegida que retorna o ID do usuário logado
 
-### Segurança
+### Segurança e Controle de Acesso
 
 * 🔒 Senhas criptografadas com **bcrypt** (12 rounds)
 * 🔒 Autenticação via **JWT tokens** com expiração de 1 hora
+* 🔒 **RBAC (Role-Based Access Control):** Controle de acesso baseado em roles (USER/ADMIN)
 * 🔒 Middleware de autenticação protege rotas sensíveis
+* 🔒 Middleware de autorização verifica permissões por role
 * 🔒 Validação de entrada de dados
 * 🔒 Tratamento centralizado de erros
 
@@ -101,16 +103,21 @@ backend/
 |--------|----------|-----------|------|
 | `POST` | `/api/users` | Cria um novo usuário | `{ "name": "string", "email": "string", "password": "string", "roles": "string" }` |
 | `POST` | `/api/users/login` | Faz login e retorna token JWT | `{ "email": "string", "password": "string" }` |
-| `GET` | `/api/users` | Lista todos os usuários | - |
 | `GET` | `/api/users/:id` | Busca usuário por ID | - |
 | `PUT` | `/api/users/:id` | Atualiza usuário | `{ "name": "string", "email": "string", "roles": "string" }` |
-| `DELETE` | `/api/users/:id` | Remove usuário | - |
 
-### Endpoints Protegidos (requer autenticação)
+### Endpoints Protegidos - Autenticação Obrigatória
+
+| Método | Endpoint | Descrição | Role Necessária | Headers |
+|--------|----------|-----------|----------------|---------|------|
+| `GET` | `/api/users/hello` | Retorna ID do usuário autenticado | Qualquer | `Authorization: Bearer {token}` |
+
+### Endpoints Protegidos - Apenas ADMIN
 
 | Método | Endpoint | Descrição | Headers |
-|--------|----------|-----------|---------|
-| `GET` | `/api/users/hello` | Retorna ID do usuário autenticado | `Authorization: Bearer {token}` |
+|--------|----------|-----------|---------|------|
+| `GET` | `/api/users` | Lista todos os usuários | `Authorization: Bearer {token}` |
+| `DELETE` | `/api/users/:id` | Remove usuário do sistema | `Authorization: Bearer {token}` |
 
 ### Exemplos de Requisições
 
@@ -224,12 +231,73 @@ npm run dev
 
 ### Com Postman
 
-1. Importe a collection ou crie requisições manualmente
-2. Crie um usuário via `POST /api/users`
-3. Faça login via `POST /api/users/login`
-4. Copie o token retornado
-5. Adicione o token no header `Authorization: Bearer {token}`
-6. Teste a rota protegida `GET /api/users/hello`
+**Testando Rotas Públicas:**
+
+1. **Criar usuário comum (USER):**
+```
+POST /api/users
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "password": "senha123",
+  "roles": "USER"
+}
+```
+
+2. **Criar usuário administrador (ADMIN):**
+```
+POST /api/users
+{
+  "name": "Admin Master",
+  "email": "admin@email.com",
+  "password": "admin123",
+  "roles": "ADMIN"
+}
+```
+
+**Testando Autenticação:**
+
+3. **Fazer login:**
+```
+POST /api/users/login
+{
+  "email": "admin@email.com",
+  "password": "admin123"
+}
+```
+
+4. **Copie o token retornado** e adicione nas próximas requisições:
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+**Testando Rotas Protegidas:**
+
+5. **Testar rota autenticada (qualquer usuário logado):**
+```
+GET /api/users/hello
+Authorization: Bearer {seu_token}
+```
+
+6. **Testar rota ADMIN (apenas com token de ADMIN):**
+```
+GET /api/users
+Authorization: Bearer {token_do_admin}
+```
+
+7. **Tentar acessar rota ADMIN com usuário USER (deve dar 403):**
+```
+GET /api/users
+Authorization: Bearer {token_do_user}
+// Resposta: { "error": "Acesso negado. Requer role: ADMIN" }
+```
+
+8. **Deletar usuário (apenas ADMIN):**
+```
+DELETE /api/users/{id}
+Authorization: Bearer {token_do_admin}
+// Resposta: { "message": "Usuário removido com sucesso." }
+```
 
 ---
 
@@ -277,7 +345,7 @@ async loginUsers({ email, password }) {
 }
 ```
 
-### 3. Middleware de Autenticação
+### 3. Middleware de Autenticação e Autorização
 
 ```javascript
 // Protege rotas verificando o token
@@ -290,6 +358,28 @@ export function authMiddleware() {
     next(); // Permite acesso à rota
   };
 }
+
+// Verifica se o usuário tem a role necessária
+export function requireRole(...allowedRoles) {
+  return (req, res, next) => {
+    if (!req.user) throw createError("Usuário não autenticado.", 401);
+    
+    const userRoles = Array.isArray(req.user.roles) 
+      ? req.user.roles 
+      : [req.user.roles];
+    
+    const hasPermission = allowedRoles.some(role => userRoles.includes(role));
+    
+    if (!hasPermission) {
+      throw createError("Acesso negado. Requer role: " + allowedRoles.join(", "), 403);
+    }
+    
+    next();
+  };
+}
+
+// Uso nas rotas
+router.get("/users", authMiddleware(), requireRole(Role.ADMIN), userController.list);
 ```
 
 ### 4. Tratamento de Erros
@@ -310,6 +400,7 @@ export default function errorMiddleware(error, req, res, next) {
 * **REST API** - Padrão de arquitetura para APIs web
 * **CRUD** - Create, Read, Update, Delete
 * **JWT** - Autenticação stateless com tokens
+* **RBAC** - Role-Based Access Control (controle de acesso baseado em papéis)
 * **Bcrypt** - Hashing seguro de senhas
 * **Middleware** - Interceptadores de requisições
 * **Arquitetura em Camadas** - Separação de responsabilidades
@@ -317,6 +408,7 @@ export default function errorMiddleware(error, req, res, next) {
 * **Mongoose** - ODM (Object Document Mapper)
 * **Async/Await** - Programação assíncrona moderna
 * **Error Handling** - Tratamento centralizado de erros
+* **Authorization vs Authentication** - Autenticação (quem é) vs Autorização (o que pode fazer)
 
 ---
 
