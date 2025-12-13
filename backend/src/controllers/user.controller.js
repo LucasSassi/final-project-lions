@@ -40,7 +40,7 @@ export default {
   async remove(req, res, next) {
     try {
       await userService.removeUser(req.params.id);
-      res.status(204).end();
+      res.status(200).json({ message: "Usuário removido com sucesso." });
     } catch (error) {
       next(error);
     }

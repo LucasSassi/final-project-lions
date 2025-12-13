@@ -45,11 +45,15 @@ export function requireRole(...allowedRoles) {
       return;
     }
 
-    const userRoles = Array.isArray(req.user.roles) ? req.user.roles : [];
+    // converte roles para array se for string
+    const userRoles = Array.isArray(req.user.roles) 
+      ? req.user.roles 
+      : [req.user.roles];
+    
     const hasPermission = allowedRoles.some((role) => userRoles.includes(role));
 
     if (!hasPermission) {
-      throw createError("Acesso negado.", 403);
+      throw createError("Acesso negado. Requer role: " + allowedRoles.join(", "), 403);
     }
 
     next();
