@@ -37,6 +37,8 @@ loginForm.addEventListener('submit', async (e) => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     
+    console.log('Tentando login com:', email);
+    
     try {
         const response = await fetch(`${API_URL}/users/login`, {
             method: 'POST',
@@ -46,7 +48,9 @@ loginForm.addEventListener('submit', async (e) => {
             body: JSON.stringify({ email, password })
         });
         
+        console.log('Status da resposta:', response.status);
         const data = await response.json();
+        console.log('Dados recebidos:', data);
         
         if (response.ok) {
             localStorage.setItem('token', data.token);
@@ -57,8 +61,8 @@ loginForm.addEventListener('submit', async (e) => {
             showError(errorMessage, data.message || 'Erro ao fazer login');
         }
     } catch (error) {
-        showError(errorMessage, 'Erro ao conectar com o servidor');
-        console.error('Erro:', error);
+        console.error('Erro completo:', error);
+        showError(errorMessage, 'Erro ao conectar com o servidor: ' + error.message);
     }
 });
 
@@ -68,7 +72,10 @@ registerForm.addEventListener('submit', async (e) => {
     
     const name = document.getElementById('registerName').value;
     const email = document.getElementById('registerEmail').value;
+    const phone = document.getElementById('registerPhone').value;
     const password = document.getElementById('registerPassword').value;
+    
+    console.log('Tentando criar conta:', { name, email, phone });
     
     try {
         // Primeiro, cria o usuário
@@ -77,12 +84,15 @@ registerForm.addEventListener('submit', async (e) => {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name, email, password })
+            body: JSON.stringify({ name, email, phone, password })
         });
         
+        console.log('Status do cadastro:', registerResponse.status);
         const registerData = await registerResponse.json();
+        console.log('Dados do cadastro:', registerData);
         
         if (registerResponse.ok) {
+            console.log('Usuário criado, fazendo login automático...');
             // Depois faz login automático
             const loginResponse = await fetch(`${API_URL}/users/login`, {
                 method: 'POST',
@@ -93,6 +103,7 @@ registerForm.addEventListener('submit', async (e) => {
             });
             
             const loginData = await loginResponse.json();
+            console.log('Dados do login:', loginData);
             
             if (loginResponse.ok) {
                 localStorage.setItem('token', loginData.token);
@@ -100,14 +111,14 @@ registerForm.addEventListener('submit', async (e) => {
                 localStorage.setItem('userName', loginData.user.name);
                 window.location.href = 'marketplace.html';
             } else {
-                showError(registerErrorMessage, 'Conta criada, mas erro ao fazer login');
+                showError(registerErrorMessage, 'Conta criada, mas erro ao fazer login: ' + (loginData.message || 'Erro desconhecido'));
             }
         } else {
             showError(registerErrorMessage, registerData.message || 'Erro ao criar conta');
         }
     } catch (error) {
-        showError(registerErrorMessage, 'Erro ao conectar com o servidor');
-        console.error('Erro:', error);
+        console.error('Erro completo:', error);
+        showError(registerErrorMessage, 'Erro ao conectar com o servidor: ' + error.message);
     }
 });
 

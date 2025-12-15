@@ -215,6 +215,85 @@ body {
     box-shadow: 0 6px 20px rgba(125, 0, 255, 0.4);
 }
 
+/* Search and Filters */
+.search-filters {
+    background: rgba(80, 0, 160, 0.2);
+    border: 2px solid #7d00ff;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.search-box {
+    margin-bottom: 15px;
+}
+
+.search-box input {
+    width: 100%;
+    padding: 12px 20px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid #5000a0;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: #bb86fc;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.search-box input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.filters-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.filter-select {
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 2px solid #5000a0;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #bb86fc;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.filter-select option {
+    background: #1a0033;
+    color: #ffffff;
+}
+
+.btn-clear {
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #5000a0;
+    border-radius: 8px;
+    color: #bb86fc;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-clear:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #bb86fc;
+}
+
 /* Cars Grid */
 .cars-grid {
     display: grid;
@@ -304,16 +383,19 @@ body {
     height: 100%;
     background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(5px);
+    overflow-y: auto;
 }
 
 .modal-content {
     background: rgba(20, 0, 40, 0.95);
     border: 2px solid #7d00ff;
     border-radius: 20px;
-    margin: 5% auto;
+    margin: 3% auto;
     padding: 40px;
     width: 90%;
     max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
     position: relative;
 }
 

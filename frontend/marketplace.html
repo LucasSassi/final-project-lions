@@ -22,6 +22,28 @@
             <button id="addCarBtn" class="btn-add">+ Adicionar Carro</button>
         </div>
         
+        <div class="search-filters">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Buscar por marca ou modelo...">
+            </div>
+            <div class="filters-row">
+                <select id="filterYear" class="filter-select">
+                    <option value="">Todos os anos</option>
+                </select>
+                <select id="filterColor" class="filter-select">
+                    <option value="">Todas as cores</option>
+                </select>
+                <select id="filterPrice" class="filter-select">
+                    <option value="">Qualquer preço</option>
+                    <option value="0-50000">Até R$ 50.000</option>
+                    <option value="50000-100000">R$ 50.000 - R$ 100.000</option>
+                    <option value="100000-200000">R$ 100.000 - R$ 200.000</option>
+                    <option value="200000-999999999">Acima de R$ 200.000</option>
+                </select>
+                <button id="clearFilters" class="btn-clear">Limpar Filtros</button>
+            </div>
+        </div>
+        
         <div id="errorMessage" class="error-message"></div>
         <div id="successMessage" class="success-message"></div>
         
@@ -43,12 +65,22 @@
                     
                     <div class="form-group">
                         <label for="year">Ano</label>
-                        <input type="number" id="year" name="year" required placeholder="Ex: 2022">
+                        <input type="number" id="year" name="year" required placeholder="Ex: 2022" min="1900">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="color">Cor</label>
+                        <input type="text" id="color" name="color" required placeholder="Ex: Prata">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mileage">Quilometragem (km)</label>
+                        <input type="number" id="mileage" name="mileage" required placeholder="Ex: 50000" min="0">
                     </div>
                     
                     <div class="form-group">
                         <label for="price">Preço (R$)</label>
-                        <input type="number" id="price" name="price" required placeholder="Ex: 80000">
+                        <input type="number" id="price" name="price" required placeholder="Ex: 80000" min="0">
                     </div>
                     
                     <div class="form-group">

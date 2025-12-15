@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API</title>
+</head>
+<body>
+    <h1>Teste de Conexão com API</h1>
+    <button onclick="testAPI()">Testar API</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testando...';
+            
+            try {
+                console.log('Testando health check...');
+                const healthResponse = await fetch('https://final-project-0hy5.onrender.com/health');
+                const healthData = await healthResponse.json();
+                console.log('Health check:', healthData);
+                
+                // Criar usuário primeiro
+                console.log('Testando criação de usuário...');
+                const registerResponse = await fetch('https://final-project-0hy5.onrender.com/api/users', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        name: 'Usuario Teste',
+                        email: 'teste' + Date.now() + '@teste.com', 
+                        password: '123456' 
+                    })
+                });
+                
+                console.log('Status do cadastro:', registerResponse.status);
+                const registerData = await registerResponse.json();
+                console.log('Register response:', registerData);
+                
+                resultDiv.innerHTML = `
+                    <h2>Health Check:</h2>
+                    <pre>${JSON.stringify(healthData, null, 2)}</pre>
+                    <h2>Cadastro Test (Status ${registerResponse.status}):</h2>
+                    <pre>${JSON.stringify(registerData, null, 2)}</pre>
+                `;
+            } catch (error) {
+                console.error('Erro:', error);
+                resultDiv.innerHTML = `<p style="color: red;">ERRO: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
